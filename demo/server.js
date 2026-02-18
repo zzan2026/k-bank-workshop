@@ -245,6 +245,145 @@ app.get('/api/topics', (req, res) => {
   res.json(summary);
 });
 
+// ─── Homepage ────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core Banking Integration Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; }
+    .header { background:linear-gradient(135deg,#1e293b,#0f172a); border-bottom:1px solid #1e293b; padding:32px 40px; }
+    .header h1 { font-size:1.8rem; font-weight:700; margin-bottom:6px; }
+    .header h1 span { color:#3b82f6; }
+    .header p { color:#64748b; font-size:0.9rem; }
+    .main { max-width:960px; margin:0 auto; padding:32px 24px; }
+    .section-title { font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:#64748b; font-weight:600; margin-bottom:16px; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:40px; }
+    .card { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:24px; transition:border-color 0.2s; }
+    .card:hover { border-color:#3b82f6; }
+    .card-icon { font-size:1.5rem; margin-bottom:10px; }
+    .card h3 { font-size:1rem; font-weight:600; margin-bottom:6px; }
+    .card p { font-size:0.85rem; color:#94a3b8; line-height:1.6; }
+    .endpoint { font-family:'Space Mono',monospace; font-size:0.8rem; background:#0f172a; border:1px solid #334155; border-radius:6px; padding:10px 14px; margin-top:12px; color:#38bdf8; display:flex; align-items:center; gap:8px; }
+    .method { font-weight:700; font-size:0.7rem; padding:2px 8px; border-radius:4px; }
+    .get { background:#22c55e20; color:#22c55e; }
+    .post { background:#3b82f620; color:#3b82f6; }
+    .try-section { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:24px; margin-bottom:24px; }
+    .try-section h3 { font-size:1rem; margin-bottom:16px; }
+    .btn { background:#3b82f6; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:500; transition:background 0.2s; margin-right:8px; margin-bottom:8px; }
+    .btn:hover { background:#2563eb; }
+    .btn-green { background:#22c55e; }
+    .btn-green:hover { background:#16a34a; }
+    .btn-yellow { background:#eab308; color:#0f172a; }
+    .btn-yellow:hover { background:#ca8a04; }
+    .output { font-family:'Space Mono',monospace; font-size:0.8rem; background:#0f172a; border:1px solid #334155; border-radius:6px; padding:16px; margin-top:16px; min-height:80px; white-space:pre-wrap; color:#94a3b8; overflow-x:auto; max-height:300px; overflow-y:auto; }
+    .status { display:inline-block; width:8px; height:8px; border-radius:50%; background:#22c55e; margin-right:8px; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+    .footer { text-align:center; padding:24px; color:#475569; font-size:0.8rem; border-top:1px solid #1e293b; margin-top:40px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><span>Core Banking</span> Integration Demo</h1>
+    <p><span class="status"></span>Running on port ${PORT} &mdash; File watchers active</p>
+  </div>
+  <div class="main">
+    <div class="section-title">Integration Patterns</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">📁</div>
+        <h3>File-to-File Transform</h3>
+        <p>Drop CSV, JSON, or XML files into <strong>input/</strong> and they auto-convert to all other formats in <strong>output/</strong>.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌉</div>
+        <h3>File-to-API Bridge</h3>
+        <p>Drop files into <strong>api-bridge/</strong> and each record is automatically POSTed to the REST API.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💾</div>
+        <h3>REST-to-File Export</h3>
+        <p>Export stored transactions back to CSV, JSON, or XML files in <strong>exports/</strong>.</p>
+        <div class="endpoint"><span class="method post">POST</span>/api/export?format=json</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <h3>Kafka-style Pub/Sub</h3>
+        <p>Publish messages to topics and subscribe via SSE for real-time streaming.</p>
+        <div class="endpoint"><span class="method post">POST</span>/api/publish/:topic</div>
+        <div class="endpoint"><span class="method get">GET</span>/api/subscribe/:topic</div>
+      </div>
+    </div>
+
+    <div class="section-title">API Endpoints</div>
+    <div class="cards">
+      <div class="card">
+        <h3>Transactions</h3>
+        <div class="endpoint"><span class="method get">GET</span>/api/transactions</div>
+        <div class="endpoint"><span class="method post">POST</span>/api/transactions</div>
+      </div>
+      <div class="card">
+        <h3>Topics</h3>
+        <div class="endpoint"><span class="method get">GET</span>/api/topics</div>
+      </div>
+    </div>
+
+    <div class="section-title">Try It Live</div>
+    <div class="try-section">
+      <h3>Quick Actions</h3>
+      <button class="btn" onclick="listTxns()">List Transactions</button>
+      <button class="btn btn-green" onclick="addSample()">Add Sample Transaction</button>
+      <button class="btn btn-yellow" onclick="exportTxns('json')">Export JSON</button>
+      <button class="btn btn-yellow" onclick="exportTxns('csv')">Export CSV</button>
+      <button class="btn btn-yellow" onclick="exportTxns('xml')">Export XML</button>
+      <div class="output" id="output">Click a button above to try the API...</div>
+    </div>
+  </div>
+  <div class="footer">K-Bank Integration Workshop &mdash; Core Banking Demo</div>
+
+  <script>
+    const out = document.getElementById('output');
+    function show(data) { out.textContent = JSON.stringify(data, null, 2); }
+
+    async function listTxns() {
+      out.textContent = 'Loading...';
+      const res = await fetch('/api/transactions');
+      show(await res.json());
+    }
+
+    async function addSample() {
+      out.textContent = 'Sending...';
+      const txn = {
+        txn_id: 'TXN-' + Date.now(),
+        account: 'ACC-' + Math.floor(Math.random()*9000+1000),
+        amount: (Math.random()*10000).toFixed(2),
+        currency: ['USD','EUR','GBP','SGD','THB'][Math.floor(Math.random()*5)],
+        type: ['credit','debit'][Math.floor(Math.random()*2)],
+        description: 'Sample transaction from dashboard'
+      };
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(txn)
+      });
+      show(await res.json());
+    }
+
+    async function exportTxns(format) {
+      out.textContent = 'Exporting...';
+      const res = await fetch('/api/export?format=' + format, { method: 'POST' });
+      show(await res.json());
+    }
+  </script>
+</body>
+</html>`);
+});
+
 // ─── Start ───────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log('');
