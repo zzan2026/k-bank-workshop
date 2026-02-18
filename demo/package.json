@@ -1,0 +1,12 @@
+{
+  "name": "core-banking-integration-demo",
+  "version": "1.0.0",
+  "description": "Core Banking Integration Workshop - Prototype Demo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
