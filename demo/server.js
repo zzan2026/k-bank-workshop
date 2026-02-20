@@ -28,7 +28,7 @@ function log(icon, color, msg) {
 
 // ─── Utility: CSV / JSON / XML converters ────────────────────────────
 function csvToRecords(csv) {
-  const lines = csv.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  const lines = csv.trim().split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   if (lines.length < 2) return [];
   const headers = lines[0].split(',').map(h => h.trim());
   return lines.slice(1).map(line => {
@@ -146,15 +146,16 @@ function handleApiBridge(filePath) {
 const debounce = {};
 function watchDir(dir, handler) {
   fs.watch(dir, (event, filename) => {
-    if (!filename || event !== 'rename') return;
+    if (!filename) return;
+    if (event !== 'rename' && event !== 'change') return;
     const fp = path.join(dir, filename);
     const key = fp;
     if (debounce[key]) return;
     debounce[key] = true;
-    setTimeout(() => { delete debounce[key]; }, 500);
+    setTimeout(() => { delete debounce[key]; }, 1000);
     setTimeout(() => {
       if (fs.existsSync(fp) && fs.statSync(fp).isFile()) handler(fp);
-    }, 200);
+    }, 300);
   });
 }
 
