@@ -142,21 +142,49 @@ function handleApiBridge(filePath) {
   });
 }
 
-// ─── File Watchers ───────────────────────────────────────────────────
+// ─── File Watchers (polling — works on Windows, WSL, and macOS) ──────
+const knownFiles = {};
 const debounce = {};
+
 function watchDir(dir, handler) {
-  fs.watch(dir, (event, filename) => {
-    if (!filename) return;
-    if (event !== 'rename' && event !== 'change') return;
-    const fp = path.join(dir, filename);
-    const key = fp;
-    if (debounce[key]) return;
-    debounce[key] = true;
-    setTimeout(() => { delete debounce[key]; }, 1000);
-    setTimeout(() => {
-      if (fs.existsSync(fp) && fs.statSync(fp).isFile()) handler(fp);
-    }, 300);
-  });
+  // Initial scan: record existing files so they don't trigger on startup
+  try {
+    fs.readdirSync(dir).forEach(filename => {
+      const fp = path.join(dir, filename);
+      try {
+        const stat = fs.statSync(fp);
+        if (stat.isFile()) knownFiles[fp] = stat.mtimeMs;
+      } catch (e) {}
+    });
+  } catch (e) {}
+
+  setInterval(() => {
+    let files;
+    try { files = fs.readdirSync(dir); } catch (e) { return; }
+
+    files.forEach(filename => {
+      const fp = path.join(dir, filename);
+      let stat;
+      try { stat = fs.statSync(fp); } catch (e) { return; }
+      if (!stat.isFile()) return;
+
+      const currentMtime = stat.mtimeMs;
+      const isNew = !(fp in knownFiles);
+      const isChanged = !isNew && knownFiles[fp] !== currentMtime;
+
+      if (isNew || isChanged) {
+        knownFiles[fp] = currentMtime;
+        if (debounce[fp]) return;
+        debounce[fp] = true;
+        setTimeout(() => { delete debounce[fp]; }, 1000);
+        setTimeout(() => {
+          try {
+            if (fs.existsSync(fp) && fs.statSync(fp).isFile()) handler(fp);
+          } catch (e) {}
+        }, 300);
+      }
+    });
+  }, 1000);
 }
 
 watchDir(DIRS.input, handleFileTransform);
